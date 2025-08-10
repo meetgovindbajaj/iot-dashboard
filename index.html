@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Dashboard - Smart Monitoring</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="login-page" class="login-container">
+        <div class="login-card card">
+            <div class="card__body">
+                <div class="login-header">
+                    <h1>IoT Dashboard</h1>
+                    <p style="color: var(--color-text-secondary); margin: var(--space-8) 0 0 0;">Sign in to your account</p>
+                </div>
+                
+                <form id="login-form" class="login-form">
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email</label>
+                        <input type="email" id="email" name="email" class="form-control" required autocomplete="email">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <input type="password" id="password" name="password" class="form-control" required autocomplete="current-password">
+                    </div>
+                    
+                    <button type="submit" class="btn btn--primary btn--full-width">Sign In</button>
+                </form>
+                
+                <div class="demo-credentials">
+                    <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin: 0 0 var(--space-8) 0;"><strong>Demo Credentials:</strong></p>
+                    <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin: 0;">Admin: admin@iot.com / admin123</p>
+                    <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin: 0;">User: user@iot.com / user123</p>
+                </div>
+                
+                <button type="button" id="demo-login" class="btn btn--outline btn--sm demo-btn">Use Demo Admin Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="app" class="app-container hidden">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h2>IoT Dashboard</h2>
+                    <div class="connection-status" id="connection-status">
+                        <span class="status-dot"></span>
+                        <span>Connected</span>
+                    </div>
+                </div>
+                
+                <div class="header-right">
+                    <button id="theme-toggle" class="btn btn--outline btn--sm theme-btn">🌙</button>
+                    <div class="user-menu">
+                        <button id="user-menu-btn" class="btn btn--secondary btn--sm">
+                            <span id="user-name">User</span> ▼
+                        </button>
+                        <div id="user-dropdown" class="user-dropdown hidden">
+                            <button class="dropdown-item" data-page="profile">👤 Profile</button>
+                            <button class="dropdown-item" data-page="settings">⚙️ Settings</button>
+                            <hr class="dropdown-divider">
+                            <button class="dropdown-item" id="logout-btn">🔓 Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="app-layout">
+            <!-- Sidebar -->
+            <nav class="sidebar">
+                <div class="nav-list">
+                    <button class="nav-item active" data-page="dashboard">📊 Dashboard</button>
+                    <button class="nav-item" data-page="sensors">📡 Sensors</button>
+                    <button class="nav-item" data-page="alerts">🔔 Alerts</button>
+                    <button class="nav-item" data-page="profile">👤 Profile</button>
+                    <button class="nav-item" data-page="settings">⚙️ Settings</button>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Dashboard Page -->
+                <div id="dashboard-page" class="page-content">
+                    <div class="page-header">
+                        <h1>Dashboard Overview</h1>
+                        <p class="page-description">Real-time monitoring of all IoT sensors</p>
+                    </div>
+
+                    <!-- Metrics Cards -->
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-icon">📊</div>
+                            <div class="metric-info">
+                                <div class="metric-value" id="total-sensors">6</div>
+                                <div class="metric-label">Total Sensors</div>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon">✅</div>
+                            <div class="metric-info">
+                                <div class="metric-value" id="active-sensors">6</div>
+                                <div class="metric-label">Active Sensors</div>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon">🔔</div>
+                            <div class="metric-info">
+                                <div class="metric-value" id="total-alerts">2</div>
+                                <div class="metric-label">Active Alerts</div>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon">❤️</div>
+                            <div class="metric-info">
+                                <div class="metric-value" id="system-health">95%</div>
+                                <div class="metric-label">System Health</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Section -->
+                    <div class="charts-section">
+                        <div class="chart-card">
+                            <h3>Sensor Readings Over Time</h3>
+                            <div class="chart-container" style="position: relative; height: 300px;">
+                                <canvas id="sensor-trends-chart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Power Consumption</h3>
+                            <div class="chart-container" style="position: relative; height: 300px;">
+                                <canvas id="power-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="card">
+                        <div class="card__header">
+                            <h3>Recent Activity</h3>
+                        </div>
+                        <div class="card__body">
+                            <div id="recent-activity" class="activity-list"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sensors Page -->
+                <div id="sensors-page" class="page-content hidden">
+                    <div class="page-header">
+                        <h1>Sensor Management</h1>
+                        <p class="page-description">Monitor and manage all IoT sensors</p>
+                    </div>
+                    <div class="sensors-grid" id="sensors-list"></div>
+                </div>
+
+                <!-- Sensor Detail Page -->
+                <div id="sensor-detail-page" class="page-content hidden">
+                    <div class="page-header">
+                        <button id="back-to-sensors" class="btn btn--outline btn--sm back-btn">← Back to Sensors</button>
+                        <h1 id="sensor-detail-name">Sensor Details</h1>
+                        <p id="sensor-detail-location" class="page-description"></p>
+                    </div>
+
+                    <div class="sensor-detail-layout">
+                        <div class="sensor-info-panel card">
+                            <div class="card__header">
+                                <h3>Current Reading</h3>
+                            </div>
+                            <div class="card__body">
+                                <div class="current-reading">
+                                    <div class="reading-main">
+                                        <span class="reading-value" id="current-reading">--</span>
+                                        <span class="reading-unit" id="current-unit">--</span>
+                                    </div>
+                                    <div class="reading-timestamp" id="reading-timestamp">--</div>
+                                    <div class="reading-status">
+                                        <span class="sensor-status active" id="sensor-status">Active</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sensor-chart-panel">
+                            <div class="chart-card">
+                                <h3>Historical Data (Last 24 Hours)</h3>
+                                <div class="chart-container" style="position: relative; height: 400px;">
+                                    <canvas id="sensor-detail-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerts Page -->
+                <div id="alerts-page" class="page-content hidden">
+                    <div class="page-header">
+                        <h1>System Alerts</h1>
+                        <p class="page-description">Monitor and manage system alerts</p>
+                    </div>
+                    <div id="alerts-list" class="alerts-container"></div>
+                </div>
+
+                <!-- Profile Page -->
+                <div id="profile-page" class="page-content hidden">
+                    <div class="page-header">
+                        <h1>User Profile</h1>
+                        <p class="page-description">Manage your account information</p>
+                    </div>
+
+                    <div class="card profile-card">
+                        <div class="card__body">
+                            <div class="form-group">
+                                <label class="form-label">Name</label>
+                                <input type="text" id="profile-name" class="form-control" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email</label>
+                                <input type="email" id="profile-email" class="form-control" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Role</label>
+                                <input type="text" id="profile-role" class="form-control" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Last Login</label>
+                                <input type="text" id="profile-last-login" class="form-control" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Page -->
+                <div id="settings-page" class="page-content hidden">
+                    <div class="page-header">
+                        <h1>Settings</h1>
+                        <p class="page-description">Configure application preferences</p>
+                    </div>
+
+                    <div class="card settings-card">
+                        <div class="card__header">
+                            <h3>Appearance</h3>
+                        </div>
+                        <div class="card__body">
+                            <div class="form-group">
+                                <label class="form-label">Theme</label>
+                                <select id="theme-select" class="form-control">
+                                    <option value="auto">Auto (System)</option>
+                                    <option value="light">Light</option>
+                                    <option value="dark">Dark</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card settings-card">
+                        <div class="card__header">
+                            <h3>Notifications</h3>
+                        </div>
+                        <div class="card__body">
+                            <div class="form-group">
+                                <label class="form-label checkbox-label">
+                                    <input type="checkbox" checked id="enable-alerts"> 
+                                    Enable real-time alerts
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label checkbox-label">
+                                    <input type="checkbox" checked id="sound-notifications"> 
+                                    Sound notifications
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card settings-card">
+                        <div class="card__header">
+                            <h3>Data Refresh</h3>
+                        </div>
+                        <div class="card__body">
+                            <div class="form-group">
+                                <label class="form-label">Update Interval</label>
+                                <select id="refresh-interval" class="form-control">
+                                    <option value="30">30 seconds</option>
+                                    <option value="60">1 minute</option>
+                                    <option value="300">5 minutes</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div id="alert-modal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Alert Details</h3>
+                <button id="modal-close" class="modal-close">×</button>
+            </div>
+            <div class="modal-body">
+                <p id="modal-message"></p>
+                <div class="modal-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Sensor:</span>
+                        <span id="modal-sensor">--</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Severity:</span>
+                        <span id="modal-severity" class="alert-severity">--</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Time:</span>
+                        <span id="modal-time">--</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="acknowledge-alert" class="btn btn--primary">Acknowledge Alert</button>
+                <button id="modal-cancel" class="btn btn--outline">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
