@@ -212,5 +212,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Architecture**: Review this file for overall project structure
 
 ---
-
-*Built with ❤️ for the IoT community*
