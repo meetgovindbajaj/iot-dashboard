@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useReducer, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { User, AuthState } from "@/types";
 import { authApi } from "@/utils/api";
 import Cookies from "js-cookie";
@@ -10,6 +11,7 @@ interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   register: (email: string, password: string, name: string) => Promise<void>;
+  forceLogoutAll: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -58,6 +60,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const router = useRouter();
   const [state, dispatch] = useReducer(authReducer, {
     user: null,
     token: null,
@@ -132,10 +135,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     Cookies.remove("user");
     dispatch({ type: "LOGOUT" });
     toast.success("Logged out successfully");
+    router.push("/login");
+  };
+
+  const forceLogoutAll = () => {
+    logout();
+    // In a real app, you'd call an API to invalidate all sessions
+    // For now, just redirect to login
   };
 
   return (
-    <AuthContext.Provider value={{ ...state, login, register, logout }}>
+    <AuthContext.Provider value={{ ...state, login, register, logout, forceLogoutAll }}>
       {children}
     </AuthContext.Provider>
   );

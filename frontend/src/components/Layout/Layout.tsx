@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Toaster } from "react-hot-toast";
@@ -21,9 +22,19 @@ export default function Layout({ children }: LayoutProps) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center">
-                <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  IoT Dashboard
-                </h1>
+                <Link href="/dashboard">
+                  <h1 className="text-xl font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer">
+                    IoT Dashboard
+                  </h1>
+                </Link>
+                {user?.role === "admin" && (
+                  <Link
+                    href="/admin"
+                    className="ml-6 text-sm text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors"
+                  >
+                    Admin Panel
+                  </Link>
+                )}
               </div>
 
               <div className="flex items-center space-x-4">

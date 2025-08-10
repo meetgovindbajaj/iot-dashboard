@@ -10,6 +10,7 @@ export interface User {
   profilePicture?: string;
   timezone?: string;
   theme: "light" | "dark";
+  isActive: boolean;
 }
 
 export interface AuthState {

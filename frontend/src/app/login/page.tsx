@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
@@ -43,6 +44,15 @@ export default function LoginPage() {
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
             Monitor your IoT devices in real-time
+          </p>
+          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+            Or{" "}
+            <Link
+              href="/register"
+              className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+            >
+              create a new account
+            </Link>
           </p>
         </div>
 

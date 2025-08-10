@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { format, parseISO, isValid } from "date-fns";
 import {
   LineChart,
   Line,
@@ -32,14 +33,14 @@ export default function SensorChart({
   height = 300,
 }: SensorChartProps) {
   // Transform data for the chart
-  const chartData: ChartDataPoint[] = data.map((item) => ({
-    timestamp: item.timestamp,
-    value: item.value,
-    formattedTime: new Date(item.timestamp).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
-  }));
+  const chartData: ChartDataPoint[] = data.map((item) => {
+    const date = parseISO(item.timestamp);
+    return {
+      timestamp: item.timestamp,
+      value: item.value,
+      formattedTime: isValid(date) ? format(date, "HH:mm") : "Invalid",
+    };
+  });
 
   // Get color based on sensor type
   const getLineColor = () => {
@@ -50,6 +51,8 @@ export default function SensorChart({
         return "#3b82f6"; // blue
       case "power":
         return "#10b981"; // green
+      case "pressure":
+        return "#f59e0b"; // amber
       default:
         return "#6366f1"; // indigo
     }
@@ -66,12 +69,29 @@ export default function SensorChart({
           ? `${value.toFixed(1)}%`
           : sensorType === "power"
           ? `${value.toFixed(2)} kW`
+          : sensorType === "pressure"
+          ? `${value.toFixed(1)} hPa`
           : `${value} ${unit}`;
+
+      // Use the original timestamp from the data point
+      const dataPoint = chartData.find(d => d.formattedTime === label);
+      let formattedDate = "Invalid Date";
+      
+      if (dataPoint && dataPoint.timestamp) {
+        try {
+          const date = parseISO(dataPoint.timestamp);
+          if (isValid(date)) {
+            formattedDate = format(date, "MMM dd, yyyy 'at' HH:mm:ss");
+          }
+        } catch (error) {
+          console.error("Date parsing error:", error);
+        }
+      }
 
       return (
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            {new Date(label).toLocaleString()}
+            {formattedDate}
           </p>
           <p className="text-sm font-semibold text-gray-900 dark:text-white">
             Value: {formattedValue}

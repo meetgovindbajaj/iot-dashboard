@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { format, isValid, parseISO } from "date-fns";
 import Layout from "@/components/Layout/Layout";
 import SensorCard from "@/components/Dashboard/SensorCard";
 import SensorChart from "@/components/Charts/SensorChart";
@@ -13,10 +14,44 @@ export default function DashboardPage() {
   const { latestReadings } = useWebSocket();
   const [selectedSensor, setSelectedSensor] = useState<Sensor | null>(null);
   const [sensors, setSensors] = useState<Sensor[]>([]);
-  const { data: chartData, loading: chartLoading } = useSensorData(
+  const { data: historicalData, loading: chartLoading } = useSensorData(
     selectedSensor?.sensorId || "",
     50
   );
+
+  // Merge historical data with real-time data for charts
+  const chartData = useMemo(() => {
+    if (!selectedSensor || !historicalData.length) return historicalData;
+
+    // Find latest reading for selected sensor
+    const latestReading = latestReadings.find(
+      (reading) => reading.sensor.sensorId === selectedSensor.sensorId
+    );
+
+    if (!latestReading?.data) return historicalData;
+
+    // Check if latest reading is newer than the most recent historical data
+    const mostRecentHistorical = historicalData[historicalData.length - 1];
+    const latestTimestamp = new Date(latestReading.data.timestamp);
+    const mostRecentTimestamp = new Date(mostRecentHistorical.timestamp);
+
+    if (latestTimestamp > mostRecentTimestamp) {
+      // Add new real-time data point
+      const newDataPoint = {
+        _id: `realtime-${Date.now()}`,
+        sensorId: selectedSensor.sensorId,
+        value: latestReading.data.value,
+        timestamp: latestReading.data.timestamp,
+        metadata: latestReading.data.metadata,
+      };
+
+      // Keep only last 50 points for chart performance
+      const updatedData = [...historicalData, newDataPoint].slice(-50);
+      return updatedData;
+    }
+
+    return historicalData;
+  }, [historicalData, latestReadings, selectedSensor]);
 
   useEffect(() => {
     const fetchSensors = async () => {
@@ -36,6 +71,18 @@ export default function DashboardPage() {
 
   const handleSensorClick = (reading: SensorReading) => {
     setSelectedSensor(reading.sensor);
+  };
+
+  const formatLastUpdate = (timestamp: string) => {
+    try {
+      const date = parseISO(timestamp);
+      if (!isValid(date)) {
+        return "No recent updates";
+      }
+      return format(date, "HH:mm:ss");
+    } catch (error) {
+      return "No recent updates";
+    }
   };
 
   const stats = {
@@ -59,40 +106,40 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
               {stats.totalSensors}
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
               Total Sensors
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400">
               {stats.activeSensors}
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
               Active Sensors
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold text-yellow-600 dark:text-yellow-400">
               {stats.alerts}
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
               Active Alerts
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div className="text-sm font-medium text-gray-900 dark:text-white">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
+            <div className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">
               Last Update
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              {new Date(stats.lastUpdate).toLocaleTimeString()}
+            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+              {formatLastUpdate(stats.lastUpdate)}
             </div>
           </div>
         </div>
@@ -102,7 +149,7 @@ export default function DashboardPage() {
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Sensor Overview
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
             {latestReadings.map((reading) => (
               <SensorCard
                 key={reading.sensor.sensorId}
