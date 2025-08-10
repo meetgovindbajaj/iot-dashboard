@@ -164,7 +164,7 @@ export default function AdminPage() {
                     Sensor Management
                   </h2>
                 </div>
-                
+
                 {/* Mobile Card Layout */}
                 <div className="block sm:hidden">
                   <div className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -198,7 +198,10 @@ export default function AdminPage() {
                           </button>
                           <button
                             onClick={() =>
-                              toggleSensorStatus(sensor.sensorId, sensor.isActive)
+                              toggleSensorStatus(
+                                sensor.sensorId,
+                                sensor.isActive
+                              )
                             }
                             className={`text-sm ${
                               sensor.isActive
@@ -297,7 +300,10 @@ export default function AdminPage() {
                               </button>
                               <button
                                 onClick={() =>
-                                  toggleSensorStatus(sensor.sensorId, sensor.isActive)
+                                  toggleSensorStatus(
+                                    sensor.sensorId,
+                                    sensor.isActive
+                                  )
                                 }
                                 className={`${
                                   sensor.isActive
@@ -325,7 +331,7 @@ export default function AdminPage() {
                     User Management
                   </h2>
                 </div>
-                
+
                 {/* Mobile Card Layout for Users */}
                 <div className="block sm:hidden">
                   <div className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -352,10 +358,14 @@ export default function AdminPage() {
                         </div>
                         <div className="flex items-center justify-between">
                           <div>
-                            <span className="text-sm text-gray-500 dark:text-gray-400">Role:</span>
+                            <span className="text-sm text-gray-500 dark:text-gray-400">
+                              Role:
+                            </span>
                             <select
                               value={u.role}
-                              onChange={(e) => updateUserRole(getUserId(u), e.target.value)}
+                              onChange={(e) =>
+                                updateUserRole(getUserId(u), e.target.value)
+                              }
                               className="ml-2 text-sm border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
                             >
                               <option value="viewer">Viewer</option>
@@ -373,7 +383,11 @@ export default function AdminPage() {
                         </div>
                         {u.lastLogin && (
                           <p className="text-xs text-gray-400 dark:text-gray-500">
-                            Last login: {format(new Date(u.lastLogin), "MMM dd, yyyy HH:mm")}
+                            Last login:{" "}
+                            {format(
+                              new Date(u.lastLogin),
+                              "MMM dd, yyyy HH:mm"
+                            )}
                           </p>
                         )}
                       </div>
@@ -420,7 +434,10 @@ export default function AdminPage() {
                             <select
                               value={userItem.role}
                               onChange={(e) =>
-                                updateUserRole(getUserId(userItem), e.target.value)
+                                updateUserRole(
+                                  getUserId(userItem),
+                                  e.target.value
+                                )
                               }
                               className="text-sm rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             >
@@ -466,7 +483,7 @@ export default function AdminPage() {
           </>
         )}
       </div>
-      
+
       <SensorConfigModal
         sensor={selectedSensor}
         isOpen={configModalOpen}

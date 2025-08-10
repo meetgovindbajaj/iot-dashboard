@@ -74,9 +74,9 @@ export default function SensorChart({
           : `${value} ${unit}`;
 
       // Use the original timestamp from the data point
-      const dataPoint = chartData.find(d => d.formattedTime === label);
+      const dataPoint = chartData.find((d) => d.formattedTime === label);
       let formattedDate = "Invalid Date";
-      
+
       if (dataPoint && dataPoint.timestamp) {
         try {
           const date = parseISO(dataPoint.timestamp);
