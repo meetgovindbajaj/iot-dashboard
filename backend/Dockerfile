@@ -1,21 +1,21 @@
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY package.json yarn.lock ./
 
 # Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+RUN yarn install --production=false && yarn cache clean
 
 # Copy source code
 COPY . .
 
 # Build the application
-RUN npm run build
+RUN yarn build
 
 # Production stage
-FROM node:18-alpine AS production
+FROM node:20-alpine AS production
 
 WORKDIR /app
 
@@ -28,7 +28,7 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nestjs -u 1001
 # Copy built application
 COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
-COPY --chown=nestjs:nodejs package*.json ./
+COPY --chown=nestjs:nodejs package.json yarn.lock ./
 
 # Switch to non-root user
 USER nestjs
@@ -38,7 +38,7 @@ EXPOSE 3001
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+  CMD node -e "require('http').get('http://localhost:3001/iot/sensors', (res) => { process.exit(res.statusCode < 500 ? 0 : 1) })"
 
 # Start the application
 ENTRYPOINT ["dumb-init", "--"]

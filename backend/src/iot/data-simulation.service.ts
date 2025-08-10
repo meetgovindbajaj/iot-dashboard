@@ -22,13 +22,13 @@ export class DataSimulationService implements OnModuleInit {
       setInterval(async () => {
         await this.iotService.addSensorData(
           "TEMP_001",
-          this.generateTemperature(20, 25), // Server room - cooler
+          this.generateTemperature(20, 25) // Server room - cooler
         );
         await this.iotService.addSensorData(
           "TEMP_002",
-          this.generateTemperature(22, 28), // Office - warmer
+          this.generateTemperature(22, 28) // Office - warmer
         );
-      }, 5000),
+      }, 5000)
     );
 
     // Simulate humidity sensors (30-70% range)
@@ -36,13 +36,13 @@ export class DataSimulationService implements OnModuleInit {
       setInterval(async () => {
         await this.iotService.addSensorData(
           "HUM_001",
-          this.generateHumidity(35, 55), // Server room - controlled
+          this.generateHumidity(35, 55) // Server room - controlled
         );
         await this.iotService.addSensorData(
           "HUM_002",
-          this.generateHumidity(40, 65), // Office - variable
+          this.generateHumidity(40, 65) // Office - variable
         );
-      }, 7000),
+      }, 7000)
     );
 
     // Simulate power sensors (1-20 kW range)
@@ -50,13 +50,23 @@ export class DataSimulationService implements OnModuleInit {
       setInterval(async () => {
         await this.iotService.addSensorData(
           "POW_001",
-          this.generatePower(8, 15), // Main panel
+          this.generatePower(8, 15) // Main panel
         );
         await this.iotService.addSensorData(
           "POW_002",
-          this.generatePower(2, 8), // UPS system
+          this.generatePower(2, 8) // UPS system
         );
-      }, 3000),
+      }, 3000)
+    );
+
+    // Simulate pressure sensors (900-1100 hPa range)
+    this.simulationIntervals.push(
+      setInterval(async () => {
+        await this.iotService.addSensorData(
+          "PRESSURE_001",
+          this.generatePressure(980, 1020) // HVAC pressure
+        );
+      }, 8000)
     );
   }
 
@@ -79,6 +89,13 @@ export class DataSimulationService implements OnModuleInit {
     const base = min + Math.random() * (max - min);
     const spike = Math.random() > 0.9 ? Math.random() * 3 : 0; // 10% chance of spike
     return Math.round((base + spike) * 100) / 100;
+  }
+
+  private generatePressure(min: number, max: number): number {
+    // Atmospheric pressure with gradual changes
+    const base = min + Math.random() * (max - min);
+    const noise = (Math.random() - 0.5) * 10; // ±5 hPa noise
+    return Math.round((base + noise) * 10) / 10;
   }
 
   stopSimulation() {

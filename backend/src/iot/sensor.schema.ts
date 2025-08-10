@@ -19,7 +19,10 @@ export class Sensor {
   name: string;
 
   @Field()
-  @Prop({ required: true, enum: ["temperature", "humidity", "power"] })
+  @Prop({
+    required: true,
+    enum: ["temperature", "humidity", "power", "pressure"],
+  })
   type: string;
 
   @Field()
@@ -30,6 +33,26 @@ export class Sensor {
   @Prop({ required: true })
   unit: string;
 
+  @Field({ nullable: true })
+  @Prop()
+  minValue?: number;
+
+  @Field({ nullable: true })
+  @Prop()
+  maxValue?: number;
+
+  @Field({ nullable: true })
+  @Prop({
+    type: {
+      min: { type: Number },
+      max: { type: Number },
+    },
+  })
+  alertThreshold?: {
+    min: number;
+    max: number;
+  };
+
   @Field()
   @Prop({ default: true })
   isActive: boolean;
@@ -37,6 +60,18 @@ export class Sensor {
   @Field()
   @Prop({ default: Date.now })
   lastUpdated: Date;
+
+  @Field({ nullable: true })
+  @Prop()
+  description?: string;
+
+  @Field({ nullable: true })
+  @Prop()
+  calibrationDate?: Date;
+
+  @Field({ nullable: true })
+  @Prop()
+  maintenanceInterval?: number; // in days
 }
 
 export const SensorSchema = SchemaFactory.createForClass(Sensor);

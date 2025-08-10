@@ -1,5 +1,5 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Document } from "mongoose";
 
 export type UserDocument = User & Document;
 
@@ -14,11 +14,32 @@ export class User {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ default: 'user', enum: ['admin', 'user'] })
+  @Prop({ default: "user", enum: ["admin", "manager", "user", "viewer"] })
   role: string;
 
   @Prop({ default: true })
   isActive: boolean;
+
+  @Prop()
+  department?: string;
+
+  @Prop()
+  phoneNumber?: string;
+
+  @Prop()
+  lastLogin?: Date;
+
+  @Prop({ type: [String], default: [] })
+  permissions: string[];
+
+  @Prop()
+  profilePicture?: string;
+
+  @Prop()
+  timezone?: string;
+
+  @Prop({ default: "light", enum: ["light", "dark"] })
+  theme: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -2,7 +2,14 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: "admin" | "user";
+  role: "admin" | "manager" | "user" | "viewer";
+  department?: string;
+  phoneNumber?: string;
+  lastLogin?: string;
+  permissions: string[];
+  profilePicture?: string;
+  timezone?: string;
+  theme: "light" | "dark";
 }
 
 export interface AuthState {
@@ -21,18 +28,29 @@ export interface RegisterData {
   email: string;
   password: string;
   name: string;
-  role?: "admin" | "user";
+  role?: "admin" | "manager" | "user" | "viewer";
+  department?: string;
+  phoneNumber?: string;
 }
 
 export interface Sensor {
   _id: string;
   sensorId: string;
   name: string;
-  type: "temperature" | "humidity" | "power";
+  type: "temperature" | "humidity" | "power" | "pressure";
   location: string;
   unit: string;
+  minValue?: number;
+  maxValue?: number;
+  alertThreshold?: {
+    min: number;
+    max: number;
+  };
   isActive: boolean;
   lastUpdated: string;
+  description?: string;
+  calibrationDate?: string;
+  maintenanceInterval?: number;
 }
 
 export interface SensorData {
@@ -46,6 +64,74 @@ export interface SensorData {
 export interface SensorReading {
   sensor: Sensor;
   data: SensorData | null;
+}
+
+export interface SensorAlert {
+  sensor: Sensor;
+  latestValue: number;
+  alertType: "high" | "low";
+  timestamp: string;
+}
+
+export interface SensorStats {
+  average: number;
+  min: number;
+  max: number;
+  count: number;
+  trend: "up" | "down" | "stable";
+}
+
+export interface UserProfile {
+  name: string;
+  department?: string;
+  phoneNumber?: string;
+  timezone?: string;
+  theme: "light" | "dark";
+}
+
+export interface ChangePasswordData {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface CreateSensorData {
+  sensorId: string;
+  name: string;
+  type: "temperature" | "humidity" | "power" | "pressure";
+  location: string;
+  unit: string;
+  minValue?: number;
+  maxValue?: number;
+  alertThreshold?: {
+    min: number;
+    max: number;
+  };
+  description?: string;
+  maintenanceInterval?: number;
+}
+
+export interface UpdateSensorData {
+  name?: string;
+  location?: string;
+  minValue?: number;
+  maxValue?: number;
+  alertThreshold?: {
+    min: number;
+    max: number;
+  };
+  description?: string;
+  maintenanceInterval?: number;
+  isActive?: boolean;
+}
+
+export interface UserStats {
+  total: number;
+  byRole: {
+    admin: number;
+    manager: number;
+    user: number;
+    viewer: number;
+  };
 }
 
 export interface SensorUpdate {
